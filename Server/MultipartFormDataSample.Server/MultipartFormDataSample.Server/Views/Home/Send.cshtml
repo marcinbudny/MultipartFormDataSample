@@ -1,0 +1,13 @@
+﻿
+@{
+    ViewBag.Title = "Send";
+}
+
+<h2>@ViewBag.Name</h2>
+
+<ul>
+    @foreach (var fileName in ViewBag.PostedFiles)
+    {
+        <li>@fileName</li>
+    }
+</ul>
