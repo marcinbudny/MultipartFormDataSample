@@ -7,11 +7,5 @@
 </div>
 
 <div class="row">
-    @using (var form = Html.BeginForm("Send", "Home", FormMethod.Post, new {enctype = "multipart/form-data"}))
-    {
-        <input type="text" name="name"/>
-        <input type="text" name="value"/>
-        <input type="file" name="files" multiple />
-        <input type="submit" value="Send" />
-    }
+
 </div>

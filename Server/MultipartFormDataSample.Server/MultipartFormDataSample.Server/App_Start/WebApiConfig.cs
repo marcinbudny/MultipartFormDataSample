@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using MultipartFormDataSample.Server.Utis;
 
 namespace MultipartFormDataSample.Server
 {
@@ -13,6 +14,8 @@ namespace MultipartFormDataSample.Server
 
             // Web API routes
             config.MapHttpAttributeRoutes();
+
+            config.Formatters.Add(new ImageSetMediaTypeFormatter());
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",

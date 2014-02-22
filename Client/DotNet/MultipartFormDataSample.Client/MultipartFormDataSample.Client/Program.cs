@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Newtonsoft.Json;
 
 namespace MultipartFormDataSample.Client
@@ -16,49 +18,47 @@ namespace MultipartFormDataSample.Client
     {
         static void Main(string[] args)
         {
-            var content = new MultipartFormDataContent();
-
-            foreach (var path in Directory.EnumerateFiles("../../../../../SampleImages"))
+            var imageSet = new ImageSet()
             {
-                var imageContent = new StreamContent(File.Open(path, FileMode.Open));
-                imageContent.Headers.ContentType = GetMediaTypeFromFilePath(path);
-                content.Add(imageContent, "files", Path.GetFileName(path));                
-            }
-
-            var model = new SampleModel
-            {
-                ModelName = "Model",
-                Items = new List<SampleItem>
-                {
-                    new SampleItem {ItemName = "Item1", ItemCount = 1},
-                    new SampleItem {ItemName = "Item2", ItemCount = 2}
-                }
+                Name = "Model",
+                Images = Directory
+                    .EnumerateFiles("../../../../../SampleImages")
+                    .Where(file => new[] {".jpg", ".png"}.Contains(Path.GetExtension(file)))
+                    .Select(file => new Image
+                    {
+                        FileName = Path.GetFileName(file),
+                        MimeType = MimeMapping.GetMimeMapping(file),
+                        ImageData = File.ReadAllBytes(file)
+                    })
+                    .ToList()
             };
 
-            var json = JsonConvert.SerializeObject(model);
-            content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "model");
-
-            var client = new HttpClient();
-            var result = client.PostAsync("http://localhost:53908/api/send", content);
-            //var result = client.PostAsync("http://localhost:53908/Home/SendWithJson", content);
-            
-            Debug.WriteLine(result.Result.ToString());
+            SendImageSet(imageSet);
         }
 
-        private static MediaTypeHeaderValue GetMediaTypeFromFilePath(string path)
+        private static void SendImageSet(ImageSet imageSet)
         {
-            switch (Path.GetExtension(path))
-            {
-                case ".jpg":
-                case ".jpeg":
-                    return new MediaTypeHeaderValue("image/jpeg");
+            var multipartContent = new MultipartFormDataContent();
 
-                case ".png":
-                    return new MediaTypeHeaderValue("image/png");
+            var imageSetJson = JsonConvert.SerializeObject(imageSet);
+            multipartContent.Add(new StringContent(imageSetJson, Encoding.UTF8, "application/json"), "imageset");
 
-                default:
-                    return new MediaTypeHeaderValue("application/octet-stream");
-            }
+            imageSet.Images.ForEach(i =>
+                {
+                    var imageContent = new ByteArrayContent(i.ImageData);
+                    imageContent.Headers.ContentType = new MediaTypeHeaderValue(i.MimeType);
+                    multipartContent.Add(imageContent, "images", i.FileName);
+                }
+            );
+
+
+            var response = new HttpClient()
+                .PostAsync("http://localhost:53908/api/send", multipartContent)
+                .Result;
+
+            var responseContent = response.Content.ReadAsStringAsync().Result;
+            Trace.Write(responseContent);
         }
+
     }
 }

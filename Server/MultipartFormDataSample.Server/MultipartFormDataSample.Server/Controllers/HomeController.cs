@@ -28,23 +28,5 @@ namespace MultipartFormDataSample.Server.Controllers
 
             return View();
         }
-
-        [HttpPost]
-        public ActionResult Send(string name, IEnumerable<HttpPostedFileBase> files)
-        {
-            ViewBag.Name = name;
-            ViewBag.PostedFiles = files.Select(pf => pf.FileName).ToList();
-            return View();
-        }
-
-        [HttpPost]
-        public ActionResult SendWithJson(string model, IEnumerable<HttpPostedFileBase> files)
-        {
-            var deserializedModel = JsonConvert.DeserializeObject<SampleModel>(model);
-
-            ViewBag.Name = deserializedModel.ModelName;
-            ViewBag.PostedFiles = files.Select(pf => pf.FileName).ToList();
-            return View("Send");
-        }
     }
 }
