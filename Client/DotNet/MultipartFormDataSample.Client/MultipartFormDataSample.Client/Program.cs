@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MultipartFormDataSample.Client
 {
@@ -40,7 +41,12 @@ namespace MultipartFormDataSample.Client
         {
             var multipartContent = new MultipartFormDataContent();
 
-            var imageSetJson = JsonConvert.SerializeObject(imageSet);
+            var imageSetJson = JsonConvert.SerializeObject(imageSet, 
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                });
+
             multipartContent.Add(new StringContent(imageSetJson, Encoding.UTF8, "application/json"), "imageset");
 
             imageSet.Images.ForEach(i =>
