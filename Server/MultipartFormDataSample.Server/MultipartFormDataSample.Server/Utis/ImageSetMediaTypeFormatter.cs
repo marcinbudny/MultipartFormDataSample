@@ -6,8 +6,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.UI;
 using MultipartFormDataSample.Server.Models;
 
 namespace MultipartFormDataSample.Server.Utis
@@ -34,12 +36,12 @@ namespace MultipartFormDataSample.Server.Utis
             var provider = await content.ReadAsMultipartAsync();
 
             var modelContent = provider.Contents
-                .FirstOrDefault(c => c.Headers.ContentDisposition.Name == "imageset");
+                .FirstOrDefault(c => c.Headers.ContentDisposition.Name.NormalizeName() == "imageset");
             
             var imageSet = await modelContent.ReadAsAsync<ImageSet>();
 
             var fileContents = provider.Contents
-                .Where(c => c.Headers.ContentDisposition.Name == "images")
+                .Where(c => c.Headers.ContentDisposition.Name.NormalizeName() == "images")
                 .ToList();
 
             imageSet.Images = new List<Image>();
@@ -49,12 +51,21 @@ namespace MultipartFormDataSample.Server.Utis
                 {
                     ImageData = await fileContent.ReadAsByteArrayAsync(),
                     MimeType = fileContent.Headers.ContentType.MediaType,
-                    FileName = fileContent.Headers.ContentDisposition.FileName
+                    FileName = fileContent.Headers.ContentDisposition.FileName.NormalizeName()
                 });
             }
 
             return imageSet;
 
         }
+    }
+
+    public static class StringExtenstions
+    {
+        public static string NormalizeName(this string text)
+        {
+            return text.Replace("\"", "");
+        }
+
     }
 }
