@@ -49,14 +49,13 @@ namespace MultipartFormDataSample.Client
 
             multipartContent.Add(new StringContent(imageSetJson, Encoding.UTF8, "application/json"), "imageset");
 
-            imageSet.Images.ForEach(i =>
-                {
-                    var imageContent = new ByteArrayContent(i.ImageData);
-                    imageContent.Headers.ContentType = new MediaTypeHeaderValue(i.MimeType);
-                    multipartContent.Add(imageContent, "images", i.FileName);
-                }
-            );
-
+            int counter = 0;
+            foreach (var image in imageSet.Images)
+            {
+                var imageContent = new ByteArrayContent(image.ImageData);
+                imageContent.Headers.ContentType = new MediaTypeHeaderValue(image.MimeType);
+                multipartContent.Add(imageContent, "image" + counter, image.FileName);
+            }
 
             var response = new HttpClient()
                 .PostAsync("http://localhost:53908/api/send", multipartContent)

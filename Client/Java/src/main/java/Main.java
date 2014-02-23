@@ -54,8 +54,9 @@ public class Main {
         String imageSetJson = gson.toJson(imageSet);
         builder.addTextBody("imageset", imageSetJson, ContentType.APPLICATION_JSON);
 
+        int counter = 0;
         for(Image image : imageSet.images) {
-            builder.addBinaryBody("images", image.imageData, ContentType.create(image.mimeType), image.fileName);
+            builder.addBinaryBody("image" + counter, image.imageData, ContentType.create(image.mimeType), image.fileName);
         }
 
         HttpEntity multipartHttpEntity = builder.build();

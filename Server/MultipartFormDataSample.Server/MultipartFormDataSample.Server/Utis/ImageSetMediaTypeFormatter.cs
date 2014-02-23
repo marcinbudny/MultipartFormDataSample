@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Permissions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.UI;
@@ -41,7 +42,7 @@ namespace MultipartFormDataSample.Server.Utis
             var imageSet = await modelContent.ReadAsAsync<ImageSet>();
 
             var fileContents = provider.Contents
-                .Where(c => c.Headers.ContentDisposition.Name.NormalizeName() == "images")
+                .Where(c => c.Headers.ContentDisposition.Name.NormalizeName().Matches(@"image\d+"))
                 .ToList();
 
             imageSet.Images = new List<Image>();
@@ -67,5 +68,9 @@ namespace MultipartFormDataSample.Server.Utis
             return text.Replace("\"", "");
         }
 
+        public static bool Matches(this string text, string pattern)
+        {
+            return Regex.IsMatch(text, pattern);
+        }
     }
 }
