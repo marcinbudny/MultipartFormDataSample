@@ -54,7 +54,7 @@ namespace MultipartFormDataSample.Client
             {
                 var imageContent = new ByteArrayContent(image.ImageData);
                 imageContent.Headers.ContentType = new MediaTypeHeaderValue(image.MimeType);
-                multipartContent.Add(imageContent, "image" + counter, image.FileName);
+                multipartContent.Add(imageContent, "image" + counter++, image.FileName);
             }
 
             var response = new HttpClient()
